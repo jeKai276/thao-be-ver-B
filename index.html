@@ -692,8 +692,11 @@ document.addEventListener("keydown", (e) => {
       return;
     }
 
-    window.vwoCode = window.vwoCode || [];
-    window.vwoCode.push(['track.goal', 'sign_up_success']);
+    window._vwo_code = window._vwo_code || {}; 
+    window._vwo_code.finish = window._vwo_code.finish || function(e){};
+    // Gửi tín hiệu về VWO
+    window.VWO = window.VWO || [];
+    window.VWO.push(['track.goal', 'sign_up_success']);
 
     hideOverlay();
     const { data: userData } = await supabase.auth.getUser();
