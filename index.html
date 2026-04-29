@@ -693,10 +693,10 @@ document.addEventListener("keydown", (e) => {
     }
 
     // VWO goal tracking: run only after Supabase signUp succeeds.
-    window.vwoCode = window.vwoCode || [];
-    window.vwoCode.push(['track.goal', 'sign_up_success']);
-
-    // Keep compatibility with VWO SmartCode queue as well.
+    // NOTE:
+    // - _vwo_code: internal loader object from SmartCode.
+    // - VWO: command queue used for tracking calls (track.goal, etc).
+    // - vwoCode: only script tag id in this page, not a tracking queue.
     window.VWO = window.VWO || [];
     window.VWO.push(['track.goal', 'sign_up_success']);
 
