@@ -692,6 +692,9 @@ document.addEventListener("keydown", (e) => {
       return;
     }
 
+    window.vwoCode = window.vwoCode || [];
+    window.vwoCode.push(['track.goal', 'sign_up_success']);
+
     hideOverlay();
     const { data: userData } = await supabase.auth.getUser();
     updateNavbar(userData?.user || data?.user || null);
