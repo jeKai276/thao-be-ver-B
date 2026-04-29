@@ -1,0 +1,767 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PinBoard – Version B (Variant)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --coral:#D85A30;--coral-light:#FAECE7;--coral-mid:#F0997B;
+    --teal:#1D9E75;--teal-light:#E1F5EE;--teal-mid:#6DCAAA;
+    --text-dark:#2C2C2A;--text-mid:#5F5E5A;--text-light:#9B9890;
+    --border:#D3D1C7;--bg:#F7F5F0;--white:#fff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text-dark);min-height:100vh;}
+
+  nav{background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:600;color:var(--coral);}
+  .nav-right{display:flex;align-items:center;gap:1rem;}
+  .btn-outline{padding:7px 18px;border:1.5px solid var(--text-dark);border-radius:20px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;color:var(--text-dark);transition:all .2s;}
+  .btn-outline:hover{background:var(--text-dark);color:#fff;}
+  .btn-solid{padding:7px 18px;border:1.5px solid var(--coral);border-radius:20px;background:var(--coral);font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;color:#fff;transition:all .2s;}
+  .btn-solid:hover{background:#B94E26;}
+
+  /* Metrics */
+  .metrics-wrap{max-width:1180px;margin:0 auto;padding:1.5rem 1.5rem 0;}
+  .stats-bar{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1rem 1.5rem;display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center;}
+  .metrics-title{font-size:.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;flex-basis:100%;}
+  .stat-item{text-align:center;flex:1;min-width:80px;}
+  .stat-num{font-size:1.4rem;font-weight:500;color:var(--text-dark);}
+  .stat-label{font-size:.72rem;color:var(--text-light);margin-top:2px;}
+  .stat-item.highlight .stat-num{color:var(--teal);}
+
+  .hero-banner{background:linear-gradient(135deg,#2C2C2A 0%,#4A3828 100%);padding:3.5rem 2rem;text-align:center;color:#fff;}
+  .hero-banner h1{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:700;margin-bottom:.75rem;letter-spacing:-.5px;}
+  .hero-banner p{font-size:1rem;opacity:.75;max-width:480px;margin:0 auto 1.5rem;line-height:1.65;}
+  .hero-cta{display:inline-block;background:var(--coral);color:#fff;padding:12px 32px;border-radius:24px;font-size:.95rem;font-weight:600;text-decoration:none;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;}
+  .hero-cta:hover{background:#B94E26;}
+
+  .trending-strip{background:#fff;border-bottom:1px solid var(--border);padding:.75rem 2rem;display:flex;align-items:center;gap:10px;overflow-x:auto;}
+  .trending-strip::-webkit-scrollbar{display:none;}
+  .trending-label{font-size:.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+  .trending-tag{padding:5px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:.78rem;white-space:nowrap;color:var(--text-mid);background:#fff;cursor:pointer;transition:all .2s;}
+  .trending-tag:hover{background:var(--coral-light);border-color:var(--coral-mid);color:var(--coral);}
+
+  .content-area{max-width:1180px;margin:0 auto;padding:2rem 1.5rem;}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.25rem;}
+  .section-head h2{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;}
+  .section-head a{font-size:.82rem;color:var(--coral);text-decoration:none;}
+
+  .search-bar{background:#fff;border:1.5px solid var(--border);border-radius:24px;padding:11px 20px;width:100%;max-width:520px;display:block;margin:0 auto 2rem;font-family:'DM Sans',sans-serif;font-size:.95rem;color:var(--text-dark);outline:none;transition:border-color .2s;}
+  .search-bar:focus{border-color:var(--coral);}
+  .categories{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:2.5rem;}
+  .cat-tag{padding:7px 18px;border:1.5px solid var(--border);border-radius:20px;font-size:.82rem;font-weight:500;cursor:pointer;color:var(--text-mid);background:#fff;transition:all .2s;}
+  .cat-tag:hover,.cat-tag.active{background:var(--coral-light);border-color:var(--coral-mid);color:var(--coral);}
+
+  .featured-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:2.5rem;}
+  @media(max-width:700px){.featured-row{grid-template-columns:1fr;}}
+  .featured-card{border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.07);cursor:pointer;transition:transform .2s;}
+  .featured-card:hover{transform:translateY(-3px);}
+  .featured-card .card-img{display:flex;align-items:center;justify-content:center;}
+  .featured-card .card-body{padding:1rem 1.2rem 1.2rem;}
+  .featured-card .card-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--coral);margin-bottom:.3rem;}
+  .featured-card h3{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;margin-bottom:.4rem;line-height:1.35;}
+  .featured-card p{font-size:.8rem;color:var(--text-mid);line-height:1.6;}
+
+  .collections{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:3rem;}
+  .coll-card{border-radius:16px;overflow:hidden;position:relative;cursor:pointer;transition:transform .2s;}
+  .coll-card:hover{transform:translateY(-3px);}
+  .coll-card .coll-bg{display:flex;align-items:center;justify-content:center;height:130px;font-size:3rem;}
+  .coll-card .coll-label{position:absolute;bottom:0;left:0;right:0;padding:.75rem 1rem;background:linear-gradient(transparent,rgba(0,0,0,.55));color:#fff;font-size:.88rem;font-weight:600;}
+  .coll-card .coll-count{font-size:.72rem;opacity:.8;}
+
+  .masonry{columns:4;column-gap:1rem;}
+  @media(max-width:960px){.masonry{columns:3;}}
+  @media(max-width:640px){.masonry{columns:2;}}
+  .pin-card{break-inside:avoid;margin-bottom:1rem;border-radius:14px;overflow:hidden;background:#fff;cursor:pointer;position:relative;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:transform .2s;}
+  .pin-card:hover{transform:translateY(-3px);}
+  .pin-card:hover .pin-save{opacity:1;}
+  .pin-info{padding:10px 12px 12px;}
+  .pin-cat{font-size:.68rem;font-weight:700;color:var(--coral);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+  .pin-title{font-size:.85rem;font-weight:500;margin-bottom:4px;line-height:1.4;}
+  .pin-source{font-size:.75rem;color:var(--text-light);display:flex;align-items:center;gap:5px;}
+  .pin-dot{width:14px;height:14px;border-radius:50%;background:var(--border);display:inline-block;flex-shrink:0;}
+  .pin-save{position:absolute;top:10px;right:10px;background:var(--coral);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;opacity:0;transition:opacity .2s;}
+
+  .promo-banner{background:linear-gradient(135deg,#FAECE7,#F5D9CC);border-radius:20px;padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:3rem;flex-wrap:wrap;}
+  .promo-banner h3{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:600;margin-bottom:.4rem;}
+  .promo-banner p{font-size:.88rem;color:var(--text-mid);line-height:1.6;max-width:420px;}
+  .promo-btn{background:var(--coral);color:#fff;padding:10px 24px;border-radius:20px;font-size:.88rem;font-weight:600;text-decoration:none;white-space:nowrap;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;}
+
+  /* Popup */
+  .b-popup{display:none;position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);z-index:200;background:#fff;border-radius:18px;padding:1.5rem 2rem;width:min(480px,92vw);box-shadow:0 8px 30px rgba(0,0,0,.18);border:1px solid var(--border);animation:slideUp .35s cubic-bezier(.34,1.56,.64,1) both;}
+  @keyframes slideUp{from{transform:translate(-50%,30px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+  .b-popup.visible{display:block;}
+  .b-popup-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.8rem;}
+  .b-popup h3{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:var(--text-dark);max-width:320px;line-height:1.35;}
+  .b-close{border:none;background:none;font-size:1.2rem;cursor:pointer;color:var(--text-light);padding:0 4px;line-height:1;}
+  .b-popup p{font-size:.85rem;color:var(--text-mid);margin-bottom:1rem;line-height:1.6;}
+  .b-popup-btns{display:flex;gap:10px;}
+  .b-popup-btns .btn-solid{flex:1;padding:10px;border-radius:10px;font-size:.9rem;}
+  .b-popup-btns .btn-outline{padding:10px 16px;font-size:.9rem;border-radius:10px;}
+  .trigger-badge{display:inline-block;background:var(--teal-light);color:var(--teal);font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:12px;margin-bottom:.6rem;}
+
+  /* Auth / Supabase Modal (Project 1 logic) */
+  .auth-notice{
+    max-width:720px;margin:18px auto 0;padding:12px 16px;border-radius:14px;
+    background:rgba(216,90,48,.12);border:1.5px solid rgba(216,90,48,.25);
+    color:var(--text-dark);display:none;
+  }
+  .auth-notice.error{
+    background:rgba(216,48,48,.10);border-color:rgba(216,48,48,.22);
+  }
+
+  .nav-user-actions{display:flex;align-items:center;gap:10px;}
+  .nav-avatar{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--coral);display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;letter-spacing:-.2px;
+  }
+
+  .hero-overlay{
+    position:fixed;inset:60px 0 0 0;z-index:50;
+    display:none;align-items:center;justify-content:center;
+    background:rgba(44,44,42,.65);backdrop-filter:blur(8px);
+  }
+  .signup-modal{background:#fff;border-radius:20px;padding:2.5rem 2rem;max-width:400px;width:90%;text-align:center;}
+  .signup-modal h2{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:600;margin-bottom:.5rem;}
+  .signup-modal p{font-size:.9rem;color:var(--text-mid);margin-bottom:1.5rem;line-height:1.6;}
+  .modal-input{
+    width:100%;padding:11px 14px;border:1.5px solid var(--border);
+    border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;margin-bottom:10px;
+    outline:none;color:var(--text-dark);background:#FAFAF8;transition:border-color .2s;
+  }
+  .modal-input:focus{border-color:var(--coral);}
+  .modal-submit{
+    width:100%;padding:12px;background:var(--coral);color:#fff;border:none;border-radius:10px;
+    font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:500;cursor:pointer;margin-top:4px;
+    transition:background .2s;
+  }
+  .modal-submit:hover{background:#B94E26;}
+  .modal-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--text-light);font-size:.8rem;}
+  .modal-divider::before,.modal-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+  .modal-social{display:flex;gap:8px;margin-bottom:14px;}
+  .social-btn{flex:1;padding:10px 8px;border:1.5px solid var(--border);border-radius:10px;background:#fff;
+    font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;}
+  .modal-footer{font-size:.78rem;color:var(--text-light);margin-top:10px;}
+  .modal-footer a{color:var(--coral);text-decoration:none;}
+
+  /* JS sẽ điều khiển blur/lock bằng cách style trực tiếp khi mở #overlay */
+  .content-wrap{filter:none;pointer-events:auto;opacity:1;transition:filter .25s ease, opacity .25s ease;}
+
+  /* Lightbox (Pinterest-like) */
+  #image-modal{
+    position:fixed;inset:0;z-index:250;
+    display:none;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.65);
+    backdrop-filter: blur(8px);
+    padding:18px;
+  }
+  #image-modal.open{display:flex;}
+  #image-modal .lightbox-inner{
+    position:relative;
+    max-width:min(980px,90vw);
+    max-height:min(720px,85vh);
+    width:auto;height:auto;
+  }
+  #image-modal img{
+    width:auto;height:auto;max-width:100%;max-height:100%;
+    object-fit:contain;
+    display:block;
+    border-radius:14px;
+    transform:scale(.985);
+    opacity:.0;
+    transition: transform .22s ease, opacity .22s ease;
+    will-change: transform, opacity;
+  }
+  #image-modal.open img{
+    transform:scale(1);
+    opacity:1;
+  }
+  #image-modal .lightbox-close{
+    position:absolute;top:-14px;right:-14px;
+    width:42px;height:42px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(0,0,0,.35);
+    color:#fff;font-size:18px;font-weight:700;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    backdrop-filter: blur(6px);
+    transition: background .15s ease, transform .15s ease;
+  }
+  #image-modal .lightbox-close:hover{background:rgba(0,0,0,.5);transform:scale(1.03);}
+  #image-modal .lightbox-caption{
+    margin-top:10px;
+    color:#fff;
+    text-align:center;
+    font-size:.92rem;
+    opacity:.9;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">PinBoard</div>
+  <div class="nav-right">
+    <div id="nav-auth-buttons" style="display:flex;align-items:center;gap:1rem;">
+      <button id="nav-login-btn" class="btn-outline" onclick="showOverlay()">로그인</button>
+      <button id="nav-signup-btn" class="btn-solid" onclick="showOverlay()">회원가입</button>
+    </div>
+
+    <div id="nav-user-actions" class="nav-user-actions" style="display:none;">
+      <div id="nav-avatar" class="nav-avatar" aria-label="사용자" role="img">?</div>
+      <button id="nav-signout-btn" class="btn-outline" onclick="handleSignOut()">로그아웃</button>
+    </div>
+  </div>
+</nav>
+
+<div id="auth-notice" class="auth-notice" role="status" aria-live="polite"></div>
+
+<div class="hero-overlay" id="overlay">
+  <div class="signup-modal">
+    <div style="font-size:2rem;margin-bottom:.5rem">📌</div>
+    <h2 id="auth-modal-title">당신의 아이디어를 발견하세요</h2>
+    <p>패션, 인테리어, 음식 등 수백만 가지 아이디어를 보려면 가입하세요.</p>
+
+    <div class="modal-social">
+      <button class="social-btn">🔵 Google</button>
+      <button class="social-btn">⚫ Facebook</button>
+    </div>
+    <div class="modal-divider">또는</div>
+
+    <input id="auth-email" class="modal-input" type="email" placeholder="이메일 주소" autocomplete="email" />
+    <input id="auth-password" class="modal-input" type="password" placeholder="비밀번호" autocomplete="current-password" />
+
+    <button id="auth-submit" class="modal-submit" onclick="handleSignUp(event)">무료로 가입하기</button>
+
+    <div class="modal-footer">
+      이미 계정이 있으신가요? <a href="#" onclick="handleLoginLink(event)">로그인</a> · <a href="#">이용약관</a> · <a href="#">개인정보처리방침</a>
+    </div>
+  </div>
+</div>
+
+<div id="image-modal" aria-hidden="true">
+  <div class="lightbox-inner" role="dialog" aria-modal="true" aria-label="이미지 확대">
+    <button class="lightbox-close" type="button" aria-label="닫기" onclick="closeLightbox()">✕</button>
+    <img id="lightbox-img" alt="Expanded image" />
+    <div id="lightbox-caption" class="lightbox-caption"></div>
+  </div>
+</div>
+
+<!-- Metrics -->
+<div class="content-wrap">
+  <div class="metrics-wrap">
+  <div class="stats-bar">
+    <div class="metrics-title">📊 실시간 행동 지표 — 트리거 감지 중...</div>
+    <div class="stat-item"><div class="stat-num" id="m-pages">1</div><div class="stat-label">조회한 페이지</div></div>
+    <div class="stat-item"><div class="stat-num" id="m-time">0s</div><div class="stat-label">체류 시간</div></div>
+    <div class="stat-item"><div class="stat-num" id="m-scroll">0%</div><div class="stat-label">스크롤 깊이</div></div>
+    <div class="stat-item"><div class="stat-num" id="m-clicks">0</div><div class="stat-label">콘텐츠 클릭</div></div>
+    <div class="stat-item highlight"><div class="stat-num" id="m-trigger">—</div><div class="stat-label">활성화된 트리거</div></div>
+  </div>
+</div>
+
+<div class="hero-banner">
+  <h1>아이디어의 세계로 오세요</h1>
+  <p>수백만 개의 사진과 아이디어를 발견하고, 저장하고, 나만의 보드를 만들어보세요.</p>
+  <button class="hero-cta" onclick="trackEngagement('click')">무료로 시작하기 →</button>
+</div>
+
+<div class="trending-strip">
+  <span class="trending-label">🔥 트렌딩</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#미니멀인테리어</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#가을코디</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#홈카페</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#제주여행</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#DIY가구</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#비건레시피</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#Y2K패션</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#발리여행</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#플랜테리어</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#홈오피스</span>
+  <span class="trending-tag" onclick="trackEngagement('click')">#교토여행</span>
+</div>
+
+<div class="content-area">
+  <input class="search-bar" placeholder="아이디어, 트렌드, 레시피 검색..." oninput="trackEngagement('search')">
+  <div class="categories">
+    <span class="cat-tag active" onclick="setCategory(this)">전체</span>
+    <span class="cat-tag" onclick="setCategory(this)">패션</span>
+    <span class="cat-tag" onclick="setCategory(this)">인테리어</span>
+    <span class="cat-tag" onclick="setCategory(this)">음식</span>
+    <span class="cat-tag" onclick="setCategory(this)">여행</span>
+    <span class="cat-tag" onclick="setCategory(this)">DIY</span>
+    <span class="cat-tag" onclick="setCategory(this)">뷰티</span>
+    <span class="cat-tag" onclick="setCategory(this)">피트니스</span>
+    <span class="cat-tag" onclick="setCategory(this)">웨딩</span>
+  </div>
+
+  <div class="section-head"><h2>✨ 오늘의 추천 컬렉션</h2><a href="#">전체 보기</a></div>
+  <div class="featured-row" id="featured-row"></div>
+
+  <div class="section-head"><h2>📂 인기 카테고리</h2><a href="#">더 보기</a></div>
+  <div class="collections" id="collections"></div>
+
+  <div class="promo-banner">
+    <div>
+      <h3>나만의 보드를 만들어보세요</h3>
+      <p>좋아하는 아이디어를 테마별로 저장하고, 친구들과 공유해보세요. 무료로 시작할 수 있어요!</p>
+    </div>
+    <button class="promo-btn" onclick="trackEngagement('click')">보드 만들기</button>
+  </div>
+
+  <div class="section-head"><h2>🌿 오늘의 핀</h2><a href="#">전체 보기</a></div>
+  <div class="masonry" id="grid"></div>
+</div>
+
+</div>
+<!-- Popup -->
+<div class="b-popup" id="b-popup">
+  <div class="trigger-badge" id="trigger-reason">✓ 충분히 탐색하셨군요!</div>
+  <div class="b-popup-header">
+    <h3>이 아이디어와 수천 개를 더 저장하시겠어요?</h3>
+    <button class="b-close" onclick="closePopup()">✕</button>
+  </div>
+  <p>무료 계정을 만들어 아이디어를 저장하고, 정리하고, 나만의 맞춤 콘텐츠를 탐색해 보세요.</p>
+  <div class="b-popup-btns">
+    <button class="btn-solid" onclick="closePopup()">지금 가입하기 — 무료</button>
+    <button class="btn-outline" onclick="closePopup()">계속 둘러보기</button>
+  </div>
+</div>
+
+<script>
+const PINS=[
+  {title:"미니멀 재패니디 거실",source:"Interior.kr",color:"#E8E0D5",h:220,cat:"인테리어",emoji:"🏠"},
+  {title:"가을 어스톤 아웃핏",source:"StyleBlog",color:"#D4C4B0",h:160,cat:"패션",emoji:"👗"},
+  {title:"아보카도 토스트 레시피",source:"FoodieKR",color:"#C8D8B8",h:190,cat:"음식",emoji:"🍳"},
+  {title:"북유럽 스타일 오픈 키친",source:"HomeDecor",color:"#B8C8D8",h:250,cat:"인테리어",emoji:"🏡"},
+  {title:"여행용 캡슐 워드로브",source:"TravelStyle",color:"#D8C8B8",h:170,cat:"패션",emoji:"🧳"},
+  {title:"LED 조명으로 꾸민 독서 코너",source:"CozyRoom",color:"#E0D0C0",h:200,cat:"인테리어",emoji:"📚"},
+  {title:"핸드메이드 라탄 바구니 DIY",source:"CraftLover",color:"#C0D0C8",h:140,cat:"DIY",emoji:"🌿"},
+  {title:"빈티지 쇼핑 패션 트렌드",source:"EcoFashion",color:"#D0C0D8",h:210,cat:"패션",emoji:"👒"},
+  {title:"홈오피스 에르고노믹 책상 세팅",source:"WFH.kr",color:"#C8D8C0",h:180,cat:"인테리어",emoji:"💻"},
+  {title:"2025 트렌드 컬러 – 모카 무스",source:"ColorTrends",color:"#D8C8C0",h:160,cat:"패션",emoji:"🎨"},
+  {title:"아파트 발코니 미니 정원",source:"UrbanGarden",color:"#C0D8B8",h:230,cat:"DIY",emoji:"🌱"},
+  {title:"건강한 한 주 식단 준비",source:"MealPrep.kr",color:"#E0C8C8",h:175,cat:"음식",emoji:"🥗"},
+  {title:"파리지앵 스타일 베레모 코디",source:"FashionSeoul",color:"#DDD0C8",h:195,cat:"패션",emoji:"🇫🇷"},
+  {title:"한옥 감성 거실 인테리어",source:"KoreanHome",color:"#E4DDD4",h:240,cat:"인테리어",emoji:"🏯"},
+  {title:"비건 라멘 레시피 30분",source:"VeganKitchen",color:"#CCDDC8",h:185,cat:"음식",emoji:"🍜"},
+  {title:"제주 올레길 여행 가이드",source:"JejuTravel",color:"#C8D4E4",h:220,cat:"여행",emoji:"🏝️"},
+  {title:"나만의 캔들 만들기 DIY",source:"CandleMaker",color:"#E8DCC8",h:165,cat:"DIY",emoji:"🕯️"},
+  {title:"오버사이즈 니트 가을 스타일",source:"SeoulStyle",color:"#D8CCD4",h:200,cat:"패션",emoji:"🧶"},
+  {title:"모던 욕실 리모델링 아이디어",source:"BathroomKR",color:"#D0D8E0",h:230,cat:"인테리어",emoji:"🛁"},
+  {title:"마라탕 홈쿡 레시피",source:"ChineseFood",color:"#E4CCC8",h:175,cat:"음식",emoji:"🌶️"},
+  {title:"발리 우붓 숨겨진 카페",source:"BaliTrip",color:"#D4E0CC",h:210,cat:"여행",emoji:"🌴"},
+  {title:"업사이클링 가구 DIY 프로젝트",source:"GreenCraft",color:"#CCE0D4",h:190,cat:"DIY",emoji:"🔨"},
+  {title:"Y2K 패션 2025 리바이벌",source:"TrendWatch",color:"#DCC8E0",h:155,cat:"패션",emoji:"✨"},
+  {title:"식물 가득한 그린 인테리어",source:"PlantHome",color:"#C8E0CC",h:245,cat:"인테리어",emoji:"🌿"},
+  {title:"교토 기온 거리 여행기",source:"JapanTrip",color:"#E0D4C8",h:200,cat:"여행",emoji:"⛩️"},
+  {title:"매크라메 벽 장식 DIY",source:"BohoDecor",color:"#E4D8CC",h:170,cat:"DIY",emoji:"🧵"},
+  {title:"한국식 브런치 플레이팅",source:"BrunchKR",color:"#D8E4CC",h:195,cat:"음식",emoji:"🥐"},
+  {title:"코펜하겐 미니멀 여행",source:"EuroTrip",color:"#CCE4E0",h:225,cat:"여행",emoji:"🚲"},
+  {title:"클래식 트렌치코트 스타일링",source:"ClassicFit",color:"#D4CCC8",h:165,cat:"패션",emoji:"🧥"},
+  {title:"나무 선반 직접 만들기",source:"WoodWork",color:"#E0D8C8",h:185,cat:"DIY",emoji:"🪵"},
+  {title:"포케 볼 만들기 레시피",source:"HealthFood",color:"#C8DCD4",h:175,cat:"음식",emoji:"🐟"},
+  {title:"모로코 마라케시 감성 여행",source:"MoroccoTrip",color:"#E4D0C0",h:215,cat:"여행",emoji:"🕌"},
+  {title:"스트리트 패션 서울 2025",source:"StreetSnap",color:"#D0CCE0",h:240,cat:"패션",emoji:"📸"},
+  {title:"빔프로젝터 홈시어터 세팅",source:"HomeTheater",color:"#C8D0E4",h:200,cat:"인테리어",emoji:"🎬"},
+  {title:"디저트 카페 메뉴 홈카페",source:"CafeLover",color:"#E8D4CC",h:185,cat:"음식",emoji:"☕"},
+  {title:"방콕 길거리 음식 탐방",source:"BangkokFood",color:"#D4E8D0",h:210,cat:"여행",emoji:"🛺"},
+];
+const FEATURED=[
+  {label:"이번 주 트렌드",title:"2025 가을 패션 가이드",desc:"올 가을 꼭 알아야 할 트렌드 아이템과 스타일링 팁을 모았어요.",color:"#D8C8B8",emoji:"👗",h:180},
+  {label:"인테리어 특집",title:"작은 공간, 큰 변화",desc:"10평 이하 원룸을 감각적으로 꾸미는 실용적인 아이디어 모음.",color:"#C8D8E0",emoji:"🏠",h:180},
+  {label:"요리 레시피",title:"주말 브런치 메뉴 7선",desc:"집에서 만드는 카페 스타일 브런치, 재료도 간단하고 맛도 최고!",color:"#D4E0C8",emoji:"🥞",h:180},
+];
+const COLLECTIONS=[
+  {title:"패션 & 스타일",count:"2.4만 핀",color:"#D0C8DC",emoji:"👗"},
+  {title:"인테리어 & 홈",count:"1.8만 핀",color:"#C8D8D0",emoji:"🏡"},
+  {title:"음식 & 레시피",count:"3.1만 핀",color:"#DCD0C4",emoji:"🍽️"},
+  {title:"여행 & 어드벤처",count:"9천 핀",color:"#C8D4E0",emoji:"✈️"},
+  {title:"DIY & 공예",count:"1.2만 핀",color:"#D8E0C8",emoji:"🔨"},
+  {title:"뷰티 & 스킨케어",count:"7천 핀",color:"#E0C8D4",emoji:"💄"},
+  {title:"피트니스 & 건강",count:"5천 핀",color:"#CCE4D8",emoji:"🏃"},
+  {title:"웨딩 & 파티",count:"4천 핀",color:"#E8D8E4",emoji:"💐"},
+];
+
+const fr=document.getElementById('featured-row');
+FEATURED.forEach(f=>{
+  const d=document.createElement('div');
+  d.className='featured-card';
+  d.innerHTML=`<div class="card-img" style="background:${f.color};height:${f.h}px;font-size:3.5rem;">${f.emoji}</div><div class="card-body"><div class="card-label">${f.label}</div><h3>${f.title}</h3><p>${f.desc}</p></div>`;
+  d.addEventListener('click',()=>trackEngagement('click'));
+  fr.appendChild(d);
+});
+const cl=document.getElementById('collections');
+COLLECTIONS.forEach(c=>{
+  const d=document.createElement('div');
+  d.className='coll-card';
+  d.innerHTML=`<div class="coll-bg" style="background:${c.color}">${c.emoji}</div><div class="coll-label">${c.title}<br><span class="coll-count">${c.count}</span></div>`;
+  d.addEventListener('click',()=>trackEngagement('click'));
+  cl.appendChild(d);
+});
+const g=document.getElementById('grid');
+
+function makeEmojiImageDataUrl(bgColor, emoji) {
+  // Create a lightweight "image" from color + emoji (keeps lightbox self-contained).
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">
+      <rect width="1200" height="800" fill="${bgColor}" />
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+        font-size="140" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
+      >${emoji}</text>
+    </svg>`;
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+
+PINS.forEach(p=>{
+  const d=document.createElement('div');
+  d.className='pin-card';
+  d.dataset.lightboxTitle = p.title;
+  d.dataset.lightboxSrc = makeEmojiImageDataUrl(p.color, p.emoji);
+  d.innerHTML=`<div style="background:${p.color};height:${p.h}px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:.6">${p.emoji}</div><div class="pin-info"><div class="pin-cat">${p.cat}</div><div class="pin-title">${p.title}</div><div class="pin-source"><span class="pin-dot"></span>${p.source}</div></div><button class="pin-save" onclick="pinClick(event)">저장</button>`;
+  d.addEventListener('click',()=>trackEngagement('click'));
+  g.appendChild(d);
+});
+
+// Tracking
+let pages=1,seconds=0,clicks=0,popupShown=false;
+window.__authOverlayShown = Boolean(window.__authOverlayShown);
+const timer=setInterval(()=>{
+  seconds++;
+  document.getElementById('m-time').textContent=seconds+'s';
+  checkTriggers();
+},1000);
+
+function getScrollDepth(){
+  const total=document.body.scrollHeight-window.innerHeight;
+  return total>0?Math.min(100,Math.round((window.scrollY/total)*100)):0;
+}
+function checkTriggers(){
+  if(window.__authOverlayShown)return;
+  const s=getScrollDepth();
+  document.getElementById('m-scroll').textContent=s+'%';
+  // Version B trigger logic: either scroll depth OR time on page.
+  if(seconds>=30){
+    document.getElementById('m-trigger').textContent='⏱️ 30초 체류';
+    showOverlay();
+    return;
+  }
+  if(s>=70){
+    document.getElementById('m-trigger').textContent='📜 페이지 70% 스크롤';
+    showOverlay();
+    return;
+  }
+}
+function trackEngagement(type){
+  if(type==='click'){clicks++;document.getElementById('m-clicks').textContent=clicks;}
+  if(type==='search'){pages++;document.getElementById('m-pages').textContent=pages;}
+}
+function pinClick(e){e.stopPropagation();trackEngagement('click');}
+function showPopup(reason){
+  popupShown=true;
+  document.getElementById('trigger-reason').textContent='✓ 트리거: '+reason;
+  document.getElementById('m-trigger').textContent=reason.split('·')[0].trim();
+  document.getElementById('b-popup').classList.add('visible');
+}
+function closePopup(){document.getElementById('b-popup').classList.remove('visible');}
+function setCategory(el){
+  document.querySelectorAll('.cat-tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  pages++;document.getElementById('m-pages').textContent=pages;
+}
+window.addEventListener('scroll',()=>{
+  const s=getScrollDepth();
+  document.getElementById('m-scroll').textContent=s+'%';
+  checkTriggers();
+});
+
+// Lightbox logic for dynamically rendered .pin-card tiles.
+window.openLightbox = function openLightbox({ src, title }) {
+  const modal = document.getElementById("image-modal");
+  const img = document.getElementById("lightbox-img");
+  const caption = document.getElementById("lightbox-caption");
+
+  if (!modal || !img || !caption || !src) return;
+
+  img.onload = () => {
+    // Start transition smoothly after image is ready.
+    requestAnimationFrame(() => {
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    });
+  };
+
+  // Reset before showing.
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  caption.textContent = title || "";
+  img.src = src;
+
+  // Fallback in case onload doesn't fire quickly (e.g. cached).
+  setTimeout(() => {
+    if (!modal.classList.contains("open")) {
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+  }, 50);
+};
+
+window.closeLightbox = function closeLightbox() {
+  const modal = document.getElementById("image-modal");
+  const img = document.getElementById("lightbox-img");
+  if (!modal || !img) return;
+
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+
+  // Let transition complete before removing content.
+  setTimeout(() => {
+    img.src = "";
+    const caption = document.getElementById("lightbox-caption");
+    if (caption) caption.textContent = "";
+  }, 220);
+};
+
+// Click card to open.
+const gridEl = document.getElementById("grid");
+if (gridEl) {
+  gridEl.addEventListener("click", (e) => {
+    const card = e.target.closest(".pin-card");
+    if (!card) return;
+
+    const src = card.dataset.lightboxSrc;
+    const titleEl = card.querySelector(".pin-title");
+    const title = titleEl?.textContent || card.dataset.lightboxTitle || "";
+
+    window.openLightbox({ src, title });
+  });
+}
+
+// Close when clicking outside image.
+const modalEl = document.getElementById("image-modal");
+if (modalEl) {
+  modalEl.addEventListener("click", (e) => {
+    // If backdrop is clicked (not the inner dialog), close it.
+    if (e.target === modalEl) window.closeLightbox();
+  });
+}
+
+// Close with ESC key.
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") window.closeLightbox();
+});
+</script>
+
+<script>
+  // Supabase CDN (dynamic import) + Email/Password auth.
+  const SUPABASE_URL = "https://hgzivfazhdjxvdakcjgw.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_0vMrCuFCRP-dn5W1RutjKQ_axSHLSGn";
+
+  const supabasePromise = (async () => {
+    const mod = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
+    return mod.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  })();
+
+  window.__authUser = null;
+  window.__authReady = false;
+
+  window.updateNavbar = function updateNavbar(user) {
+    const authButtons = document.getElementById("nav-auth-buttons");
+    const userActions = document.getElementById("nav-user-actions");
+    const avatar = document.getElementById("nav-avatar");
+
+    if (!authButtons || !userActions || !avatar) return;
+
+    if (user) {
+      authButtons.style.display = "none";
+      userActions.style.display = "flex";
+
+      const email = user.email || "";
+      const letter = email.trim().charAt(0).toUpperCase() || "?";
+      avatar.textContent = letter;
+      avatar.title = email || "User";
+    } else {
+      authButtons.style.display = "flex";
+      userActions.style.display = "none";
+      avatar.textContent = "?";
+      avatar.title = "";
+    }
+  };
+
+  function setNotice(message, isError) {
+    const el = document.getElementById("auth-notice");
+    if (!el) return;
+    if (!message) {
+      el.textContent = "";
+      el.classList.remove("error");
+      el.style.display = "none";
+      return;
+    }
+    el.textContent = message;
+    el.classList.toggle("error", Boolean(isError));
+    el.style.display = "block";
+  }
+
+  function hideOverlay() {
+    const overlay = document.getElementById("overlay");
+    if (overlay) overlay.style.display = "none";
+
+    window.__authOverlayShown = false;
+
+    // Allow interaction after auth succeeds.
+    const content = document.querySelector(".content-wrap");
+    if (content) {
+      content.style.filter = "none";
+      content.style.pointerEvents = "auto";
+      content.style.opacity = "1";
+    }
+  }
+
+  window.showOverlay = function showOverlay() {
+    // If session isn't checked yet, avoid opening modal/blur prematurely.
+    if (window.__authReady === false) return;
+    if (window.__authUser) return; // logged in -> don't show signup modal
+
+    const overlay = document.getElementById("overlay");
+    if (overlay) overlay.style.display = "flex";
+
+    window.__authOverlayShown = true;
+
+    // Lock the page behind the modal.
+    const content = document.querySelector(".content-wrap");
+    if (content) {
+      content.style.filter = "blur(3px)";
+      content.style.pointerEvents = "none";
+      content.style.opacity = ".5";
+    }
+  };
+
+  // Keep navbar in sync with the real Supabase auth session.
+  (async () => {
+    const supabase = await supabasePromise;
+    supabase.auth.onAuthStateChange((event, session) => {
+      const user = session?.user || null;
+      window.__authUser = user;
+      window.__authReady = true;
+      updateNavbar(user);
+
+      if (user) hideOverlay();
+      // Version B: do not auto-show overlay/blur when logged out.
+    });
+  })();
+
+  // Registration (signup)
+  window.handleSignUp = async function handleSignUp(event) {
+    event && event.preventDefault && event.preventDefault();
+    setNotice("", false);
+    const email = document.getElementById("auth-email")?.value?.trim();
+    const password = document.getElementById("auth-password")?.value;
+
+    if (!email || !password) {
+      setNotice("이메일과 비밀번호를 입력해 주세요.", true);
+      return;
+    }
+
+    const supabase = await supabasePromise;
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) {
+      setNotice(error.message || "회원가입에 실패했습니다.", true);
+      return;
+    }
+
+    hideOverlay();
+    const { data: userData } = await supabase.auth.getUser();
+    updateNavbar(userData?.user || data?.user || null);
+    setNotice("환영합니다! 회원가입이 완료되었습니다.", false);
+  };
+
+  // Toggle modal into login mode, then login via email/password.
+  window.handleLoginLink = async function handleLoginLink(event) {
+    event && event.preventDefault && event.preventDefault();
+
+    const title = document.getElementById("auth-modal-title");
+    const submitBtn = document.getElementById("auth-submit");
+
+    if (title) title.textContent = "로그인";
+
+    if (submitBtn) {
+      submitBtn.textContent = "로그인하기";
+      submitBtn.onclick = window.handleLogin;
+    }
+
+    const modal = submitBtn?.closest(".signup-modal");
+    const hintP = modal?.querySelector("p");
+    if (hintP) hintP.textContent = "이메일과 비밀번호로 로그인하세요.";
+
+    document.getElementById("auth-email")?.focus?.();
+    setNotice("", false);
+  };
+
+  window.handleLogin = async function handleLogin(event) {
+    event && event.preventDefault && event.preventDefault();
+    setNotice("", false);
+    const email = document.getElementById("auth-email")?.value?.trim();
+    const password = document.getElementById("auth-password")?.value;
+
+    if (!email || !password) {
+      setNotice("이메일과 비밀번호를 입력해 주세요.", true);
+      return;
+    }
+
+    const supabase = await supabasePromise;
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      setNotice(error.message || "로그인에 실패했습니다.", true);
+      return;
+    }
+
+    hideOverlay();
+    window.__authUser = data?.user || null;
+    updateNavbar(data?.user || null);
+    setNotice("반갑습니다! 성공적으로 로그인되었습니다.", false);
+  };
+
+  window.handleSignOut = async function handleSignOut() {
+    setNotice("", false);
+    const supabase = await supabasePromise;
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      setNotice(error.message || "로그아웃에 실패했습니다.", true);
+      return;
+    }
+
+    // Clear any stored data and reset UI.
+    localStorage.clear();
+    window.__authUser = null;
+    updateNavbar(null);
+    showOverlay();
+    setNotice("로그아웃되었습니다.", false);
+  };
+
+  // Auto-check current session on page load (Version B: do not auto-open overlay).
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const supabase = await supabasePromise;
+      const { data } = await supabase.auth.getUser();
+      const user = data?.user || null;
+      window.__authUser = user;
+      updateNavbar(user);
+      if (user) hideOverlay();
+    } catch (e) {
+      window.__authUser = null;
+      updateNavbar(null);
+    } finally {
+      window.__authReady = true;
+    }
+  });
+</script>
+</body>
+</html>
