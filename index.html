@@ -692,9 +692,11 @@ document.addEventListener("keydown", (e) => {
       return;
     }
 
-    window._vwo_code = window._vwo_code || {}; 
-    window._vwo_code.finish = window._vwo_code.finish || function(e){};
-    // Gửi tín hiệu về VWO
+    // VWO goal tracking: run only after Supabase signUp succeeds.
+    window.vwoCode = window.vwoCode || [];
+    window.vwoCode.push(['track.goal', 'sign_up_success']);
+
+    // Keep compatibility with VWO SmartCode queue as well.
     window.VWO = window.VWO || [];
     window.VWO.push(['track.goal', 'sign_up_success']);
 
