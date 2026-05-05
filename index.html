@@ -465,21 +465,38 @@ function checkTriggers(){
   if(window.__authOverlayShown)return;
   const s=getScrollDepth();
   document.getElementById('m-scroll').textContent=s+'%';
-  // Version B trigger logic: either scroll depth OR time on page.
-  if(seconds>=30){
-    document.getElementById('m-trigger').textContent='⏱️ 30초 체류';
-    showOverlay();
+  // Condition 1: 2+ pages viewed AND ≥30 seconds on site
+  if(pages>=2 && seconds>=30){
+    document.getElementById('m-trigger').textContent='📄+⏱️ 2페이지+30초';
+    window.showOverlay?.();
     return;
   }
+  // Condition 2: scroll depth ≥70%
   if(s>=70){
-    document.getElementById('m-trigger').textContent='📜 페이지 70% 스크롤';
-    showOverlay();
+    document.getElementById('m-trigger').textContent='📜 70% 스크롤';
+    window.showOverlay?.();
+    return;
+  }
+  // Condition 3: clicked on any content
+  if(clicks>=1){
+    document.getElementById('m-trigger').textContent='👆 콘텐츠 클릭';
+    window.showOverlay?.();
     return;
   }
 }
 function trackEngagement(type){
-  if(type==='click'){clicks++;document.getElementById('m-clicks').textContent=clicks;}
-  if(type==='search'){pages++;document.getElementById('m-pages').textContent=pages;}
+  window.VWO = window.VWO || [];
+  if(type==='click'){
+    clicks++;
+    document.getElementById('m-clicks').textContent=clicks;
+    window.VWO.push(['event', 'content_click']);
+    checkTriggers();
+  }
+  if(type==='search'){
+    pages++;
+    document.getElementById('m-pages').textContent=pages;
+    window.VWO.push(['event', 'page_view']);
+  }
 }
 function pinClick(e){e.stopPropagation();trackEngagement('click');}
 function showPopup(reason){
@@ -492,7 +509,10 @@ function closePopup(){document.getElementById('b-popup').classList.remove('visib
 function setCategory(el){
   document.querySelectorAll('.cat-tag').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  pages++;document.getElementById('m-pages').textContent=pages;
+  pages++;
+  document.getElementById('m-pages').textContent=pages;
+  window.VWO = window.VWO || [];
+  window.VWO.push(['event', 'page_view']);
 }
 window.addEventListener('scroll',()=>{
   const s=getScrollDepth();
