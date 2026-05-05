@@ -167,6 +167,7 @@ if(f=!1,v=d.querySelector('#vwoCode'),cc={},-1<d.URL.indexOf('__vwo_disable__')|
     font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;}
   .modal-footer{font-size:.78rem;color:var(--text-light);margin-top:10px;}
   .modal-footer a{color:var(--coral);text-decoration:none;}
+  .modal-error-msg{color:#C0392B;background:#FDECEA;border:1px solid #F5C6CB;border-radius:8px;padding:10px 12px;font-size:.85rem;font-weight:500;text-align:left;margin:0 0 10px;display:none;line-height:1.5;}
 
   /* JS sẽ điều khiển blur/lock bằng cách style trực tiếp khi mở #overlay */
   .content-wrap{filter:none;pointer-events:auto;opacity:1;transition:filter .25s ease, opacity .25s ease;}
@@ -254,7 +255,7 @@ if(f=!1,v=d.querySelector('#vwoCode'),cc={},-1<d.URL.indexOf('__vwo_disable__')|
 
     <input id="auth-email" class="modal-input" type="email" placeholder="이메일 주소" autocomplete="email" />
     <input id="auth-password" class="modal-input" type="password" placeholder="비밀번호" autocomplete="current-password" />
-
+    <p id="modal-error-msg" class="modal-error-msg"></p>
     <button id="auth-submit" class="modal-submit" onclick="handleSignUp(event)">무료로 가입하기</button>
 
     <div class="modal-footer">
@@ -588,6 +589,13 @@ document.addEventListener("keydown", (e) => {
 
   const AUTH_PASSWORD_MIN = 6;
 
+  function setModalError(msg) {
+    const el = document.getElementById("modal-error-msg");
+    if (!el) return;
+    el.textContent = msg || "";
+    el.style.display = msg ? "block" : "none";
+  }
+
   function formatAuthError(err) {
     if (err == null) return "요청을 처리할 수 없습니다.";
     if (typeof err === "string") return err;
@@ -688,16 +696,17 @@ document.addEventListener("keydown", (e) => {
   window.handleSignUp = async function handleSignUp(event) {
     event && event.preventDefault && event.preventDefault();
     setNotice("", false);
+    setModalError("");
     const email = document.getElementById("auth-email")?.value?.trim();
     const password = document.getElementById("auth-password")?.value;
 
     if (!email || !password) {
-      setNotice("이메일과 비밀번호를 입력해 주세요.", true);
+      setModalError("이메일과 비밀번호를 입력해 주세요.");
       return;
     }
 
     if (password.length < AUTH_PASSWORD_MIN) {
-      setNotice(`비밀번호는 최소 ${AUTH_PASSWORD_MIN}자 이상이어야 합니다.`, true);
+      setModalError(`비밀번호는 최소 ${AUTH_PASSWORD_MIN}자 이상이어야 합니다.`);
       return;
     }
 
@@ -707,11 +716,11 @@ document.addEventListener("keydown", (e) => {
       const out = await supabase.auth.signUp({ email, password });
       data = out.data;
       if (out.error) {
-        setNotice(formatAuthError(out.error), true);
+        setModalError(formatAuthError(out.error));
         return;
       }
     } catch (e) {
-      setNotice(formatAuthError(e), true);
+      setModalError(formatAuthError(e));
       return;
     }
 
@@ -749,21 +758,23 @@ document.addEventListener("keydown", (e) => {
 
     document.getElementById("auth-email")?.focus?.();
     setNotice("", false);
+    setModalError("");
   };
 
   window.handleLogin = async function handleLogin(event) {
     event && event.preventDefault && event.preventDefault();
     setNotice("", false);
+    setModalError("");
     const email = document.getElementById("auth-email")?.value?.trim();
     const password = document.getElementById("auth-password")?.value;
 
     if (!email || !password) {
-      setNotice("이메일과 비밀번호를 입력해 주세요.", true);
+      setModalError("이메일과 비밀번호를 입력해 주세요.");
       return;
     }
 
     if (password.length < AUTH_PASSWORD_MIN) {
-      setNotice(`비밀번호는 최소 ${AUTH_PASSWORD_MIN}자 이상이어야 합니다.`, true);
+      setModalError(`비밀번호는 최소 ${AUTH_PASSWORD_MIN}자 이상이어야 합니다.`);
       return;
     }
 
@@ -773,11 +784,11 @@ document.addEventListener("keydown", (e) => {
       const out = await supabase.auth.signInWithPassword({ email, password });
       data = out.data;
       if (out.error) {
-        setNotice(formatAuthError(out.error), true);
+        setModalError(formatAuthError(out.error));
         return;
       }
     } catch (e) {
-      setNotice(formatAuthError(e), true);
+      setModalError(formatAuthError(e));
       return;
     }
 
