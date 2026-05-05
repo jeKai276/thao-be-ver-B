@@ -454,6 +454,10 @@ window.__authOverlayShown = Boolean(window.__authOverlayShown);
 const timer=setInterval(()=>{
   seconds++;
   document.getElementById('m-time').textContent=seconds+'s';
+  if(seconds===30){
+    window.VWO = window.VWO || [];
+    window.VWO.push(['event', 'time_on_site']);
+  }
   checkTriggers();
 },1000);
 
