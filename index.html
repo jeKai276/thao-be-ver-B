@@ -727,10 +727,10 @@ document.addEventListener("keydown", (e) => {
     // VWO goal tracking: run only after Supabase signUp succeeds.
     // NOTE:
     // - _vwo_code: internal loader object from SmartCode.
-    // - VWO: command queue used for tracking calls (track.goal, etc).
+    // - VWO: command queue used for tracking calls (event, etc).
     // - vwoCode: only script tag id in this page, not a tracking queue.
     window.VWO = window.VWO || [];
-    window.VWO.push(['track.goal', 'sign_up_success']);
+    window.VWO.push(['event', { eventName: 'sign_up_success' }]);
 
     hideOverlay();
     const { data: userData } = await supabase.auth.getUser();
