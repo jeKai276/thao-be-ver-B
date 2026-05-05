@@ -730,7 +730,7 @@ document.addEventListener("keydown", (e) => {
     // - VWO: command queue used for tracking calls (event, etc).
     // - vwoCode: only script tag id in this page, not a tracking queue.
     window.VWO = window.VWO || [];
-    window.VWO.push(['event', { eventName: 'sign_up_success' }]);
+    window.VWO.push(['event', 'sign_up_success']);
 
     hideOverlay();
     const { data: userData } = await supabase.auth.getUser();
