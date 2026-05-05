@@ -122,12 +122,14 @@ if(f=!1,v=d.querySelector('#vwoCode'),cc={},-1<d.URL.indexOf('__vwo_disable__')|
   .trigger-badge{display:inline-block;background:var(--teal-light);color:var(--teal);font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:12px;margin-bottom:.6rem;}
 
   /* Auth / Supabase Modal (Project 1 logic) */
-  .auth-notice{
-    max-width:720px;margin:18px auto 0;padding:12px 16px;border-radius:14px;
+  #auth-notice.auth-notice{
+    position:fixed;top:68px;left:50%;transform:translateX(-50%);z-index:60;
+    max-width:min(720px,calc(100% - 2rem));width:100%;margin:0;padding:12px 16px;
+    border-radius:14px;box-sizing:border-box;
     background:rgba(216,90,48,.12);border:1.5px solid rgba(216,90,48,.25);
     color:var(--text-dark);display:none;
   }
-  .auth-notice.error{
+  #auth-notice.auth-notice.error{
     background:rgba(216,48,48,.10);border-color:rgba(216,48,48,.22);
   }
 
@@ -584,6 +586,16 @@ document.addEventListener("keydown", (e) => {
     return mod.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   })();
 
+  const AUTH_PASSWORD_MIN = 6;
+
+  function formatAuthError(err) {
+    if (err == null) return "요청을 처리할 수 없습니다.";
+    if (typeof err === "string") return err;
+    const msg = err.message || err.msg || err.error_description || "";
+    if (typeof msg === "string" && msg.trim()) return msg.trim();
+    return "오류가 발생했습니다.";
+  }
+
   window.__authUser = null;
   window.__authReady = false;
 
@@ -684,11 +696,22 @@ document.addEventListener("keydown", (e) => {
       return;
     }
 
-    const supabase = await supabasePromise;
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (password.length < AUTH_PASSWORD_MIN) {
+      setNotice(`비밀번호는 최소 ${AUTH_PASSWORD_MIN}자 이상이어야 합니다.`, true);
+      return;
+    }
 
-    if (error) {
-      setNotice(error.message || "회원가입에 실패했습니다.", true);
+    const supabase = await supabasePromise;
+    let data;
+    try {
+      const out = await supabase.auth.signUp({ email, password });
+      data = out.data;
+      if (out.error) {
+        setNotice(formatAuthError(out.error), true);
+        return;
+      }
+    } catch (e) {
+      setNotice(formatAuthError(e), true);
       return;
     }
 
@@ -739,11 +762,22 @@ document.addEventListener("keydown", (e) => {
       return;
     }
 
-    const supabase = await supabasePromise;
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (password.length < AUTH_PASSWORD_MIN) {
+      setNotice(`비밀번호는 최소 ${AUTH_PASSWORD_MIN}자 이상이어야 합니다.`, true);
+      return;
+    }
 
-    if (error) {
-      setNotice(error.message || "로그인에 실패했습니다.", true);
+    const supabase = await supabasePromise;
+    let data;
+    try {
+      const out = await supabase.auth.signInWithPassword({ email, password });
+      data = out.data;
+      if (out.error) {
+        setNotice(formatAuthError(out.error), true);
+        return;
+      }
+    } catch (e) {
+      setNotice(formatAuthError(e), true);
       return;
     }
 
