@@ -728,6 +728,7 @@ document.addEventListener("keydown", (e) => {
   // Registration (signup)
   window.handleSignUp = async function handleSignUp(event) {
     event && event.preventDefault && event.preventDefault();
+    trackEngaged();
     setNotice("", false);
     setModalError("");
     const email = document.getElementById("auth-email")?.value?.trim();
