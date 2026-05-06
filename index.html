@@ -452,7 +452,7 @@ PINS.forEach(p=>{
 let pages=1,seconds=0,clicks=0,popupShown=false,engaged=false;
 function trackEngaged(){
   if(engaged)return;
-  trackEngaged();
+  engaged=true;
   window.VWO = window.VWO || [];
   window.VWO.push(['event', 'engaged']);
 }
