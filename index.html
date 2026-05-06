@@ -450,18 +450,18 @@ PINS.forEach(p=>{
 
 // Tracking
 let pages=1,seconds=0,clicks=0,popupShown=false,engaged=false;
-window.addEventListener('beforeunload',()=>{
-  if(!engaged){
-    window.VWO = window.VWO || [];
-    window.VWO.push(['event', 'bounce']);
-  }
-});
+function trackEngaged(){
+  if(engaged)return;
+  trackEngaged();
+  window.VWO = window.VWO || [];
+  window.VWO.push(['event', 'engaged']);
+}
 window.__authOverlayShown = Boolean(window.__authOverlayShown);
 const timer=setInterval(()=>{
   seconds++;
   document.getElementById('m-time').textContent=seconds+'s';
   if(seconds===30){
-    engaged=true;
+    trackEngaged();
     window.VWO = window.VWO || [];
     window.VWO.push(['event', 'time_on_site']);
   }
@@ -496,7 +496,7 @@ function checkTriggers(){
   }
 }
 function trackEngagement(type){
-  engaged=true;
+  trackEngaged();
   window.VWO = window.VWO || [];
   if(type==='click'){
     clicks++;
@@ -519,7 +519,7 @@ function showPopup(reason){
 }
 function closePopup(){document.getElementById('b-popup').classList.remove('visible');}
 function setCategory(el){
-  engaged=true;
+  trackEngaged();
   document.querySelectorAll('.cat-tag').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   pages++;
